@@ -35,7 +35,13 @@ def create_customer():
         print('Invalid form data')
         return jsonify({'error': 'Invalid form data'}), 400
 
-    new_customer = Customer(name=data['name'], city=data['city'], age=data['age'])
+    new_customer = None
+    try:
+        new_customer = Customer(name=data['name'], city=data['city'], age=data['age'])
+    except ValueError as e:
+        msg = f'Error creating customer: {str(e)}'
+        print(msg)
+        return jsonify({'error': msg}), 400
 
     try:
         # Add the new customer to the session and commit to save to the database
@@ -85,14 +91,25 @@ def edit_customer(customer_id):
         data = request.form
 
         # Update customer details
-        customer.name = data['name']
-        customer.city = data['city']
-        customer.age = data['age']
+        # Use constructor validation, then plain assigment,
+        # because ORM object tracking forces us to do so.
+        new = Customer(
+            data.get('name', customer.name),
+            data.get('city', customer.city),
+            data.get('age', customer.age),
+        )
+        customer.name = new.name
+        customer.city = new.city
+        customer.age = new.age
 
         # Commit the changes to the database
         db.session.commit()
         print('Customer updated succesfully')
         return redirect(url_for('customers.list_customers'))
+    except ValueError as e:
+        msg = f'Error creating customer: {str(e)}'
+        print(msg)
+        return jsonify({'error': msg}), 400
     except Exception as e:
         # Handle any exceptions
         db.session.rollback()

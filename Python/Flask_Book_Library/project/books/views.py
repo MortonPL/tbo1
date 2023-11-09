@@ -32,7 +32,13 @@ def list_books_json():
 def create_book():
     data = request.get_json()
 
-    new_book = Book(name=data['name'], author=data['author'], year_published=data['year_published'], book_type=data['book_type'])
+    new_book = None
+    try:
+        new_book = Book(name=data['name'], author=data['author'], year_published=data['year_published'], book_type=data['book_type'])
+    except ValueError as e:
+        msg = f'Error creating book: {str(e)}'
+        print(msg)
+        return jsonify({'error': msg}), 400
 
     try:
         # Add the new book to the session and commit to save to the database
@@ -63,15 +69,27 @@ def edit_book(book_id):
         data = request.get_json()
         
         # Update book details
-        book.name = data.get('name', book.name)  # Update if data exists, otherwise keep the same
-        book.author = data.get('author', book.author)
-        book.year_published = data.get('year_published', book.year_published)
-        book.book_type = data.get('book_type', book.book_type)
-        
+        # Use constructor validation, then plain assigment,
+        # because ORM object tracking forces us to do so.
+        new = Book(
+            data.get('name', book.name),
+            data.get('author', book.author),
+            data.get('year_published', book.year_published),
+            data.get('book_type', book.book_type)
+        )
+        book.name = new.name
+        book.author = new.author
+        book.year_published = new.year_published
+        book.book_type = new.book_type
+
         # Commit the changes to the database
         db.session.commit()
         print('Book edited successfully')
         return jsonify({'message': 'Book updated successfully'})
+    except ValueError as e:
+        msg = f'Error updating book: {str(e)}'
+        print(msg)
+        return jsonify({'error': msg}), 400
     except Exception as e:
         # Handle any exceptions
         db.session.rollback()

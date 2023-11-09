@@ -13,6 +13,16 @@ class Book(db.Model):
     status = db.Column(db.String(20), default='available')
 
     def __init__(self, name, author, year_published, book_type, status='available'):
+        if re.match(".*[<>]+.*", name):
+            raise ValueError("Book name cannot contain triangle brackets.")
+        if not name or len(name) > 64:
+            raise ValueError("Book name must be between 1 and 64 characters long.")
+
+        if not re.match("[\\w.,'-]+", author):
+            raise ValueError("Author name can only contain alphanumeric characters, dot, coma, apostrophe and hyphen.")
+        if not author or len(author) > 64:
+            raise ValueError("Author name must be between 1 and 64 characters long.")
+
         self.name = name
         self.author = author
         self.year_published = year_published

@@ -1,4 +1,5 @@
 from project import db , app
+import re
 
 
 # Loan model
@@ -15,6 +16,16 @@ class Loan(db.Model):
     original_book_type = db.Column(db.String(64), nullable=False)
 
     def __init__(self, customer_name, book_name, loan_date, return_date, original_author, original_year_published, original_book_type):
+        if not re.match("[\\w.,'-]+", customer_name):
+            raise ValueError("Customer name can only contain alphanumeric characters, dot, coma, apostrophe and hyphen.")
+        if not customer_name or len(customer_name) > 64:
+            raise ValueError("Customer name must be between 1 and 64 characters long.")
+        
+        if not re.match("[\\w.,'-]+", book_name):
+            raise ValueError("Customer name can only contain alphanumeric characters, dot, coma, apostrophe and hyphen.")
+        if not book_name or len(book_name) > 64:
+            raise ValueError("Customer name must be between 1 and 64 characters long.")
+
         self.customer_name = customer_name
         self.book_name = book_name
         self.loan_date = loan_date
