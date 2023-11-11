@@ -27,7 +27,7 @@ Jeżeli jakaś wartość nie wymaga złożonego Value Object i nie wymaga specja
 
 ### Diagram
 
-[](./model.svg)
+![model](https://github.com/MortonPL/tbo1/assets/23420063/50adebdd-f9cf-40f5-800a-4976060e9608)
 
 ### Ograniczenia
 
